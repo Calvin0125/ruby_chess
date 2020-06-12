@@ -28,7 +28,7 @@ class Board
         x = 0
         y = 0
         64.times do
-            @spaces[:"space#{x}#{y}"] = Space.new("space#{x}#{y}")
+            @spaces[:"#{x}#{y}"] = Space.new("#{x}#{y}")
             if y < 7
                 y += 1
             elsif y >= 7
@@ -36,30 +36,30 @@ class Board
                 x += 1
             end
         end
-        @display = "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space07].display} |#{@spaces[:space17].display} |"\
-                "#{@spaces[:space27].display} |#{@spaces[:space37].display} |#{@spaces[:space47].display} |"\
-                "#{@spaces[:space57].display} |#{@spaces[:space67].display} |#{@spaces[:space77].display} |\n"\
-                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space06].display} |#{@spaces[:space16].display} |"\
-                "#{@spaces[:space26].display} |#{@spaces[:space36].display} |#{@spaces[:space46].display} |"\
-                "#{@spaces[:space56].display} |#{@spaces[:space66].display} |#{@spaces[:space76].display} |\n"\
-                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space05].display} |#{@spaces[:space15].display} |"\
-                "#{@spaces[:space25].display} |#{@spaces[:space35].display} |#{@spaces[:space45].display} |"\
-                "#{@spaces[:space55].display} |#{@spaces[:space65].display} |#{@spaces[:space75].display} |\n"\
-                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space04].display} |#{@spaces[:space14].display} |"\
-                "#{@spaces[:space24].display} |#{@spaces[:space34].display} |#{@spaces[:space44].display} |"\
-                "#{@spaces[:space54].display} |#{@spaces[:space64].display} |#{@spaces[:space74].display} |\n"\
-                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space03].display} |#{@spaces[:space13].display} |"\
-                "#{@spaces[:space23].display} |#{@spaces[:space33].display} |#{@spaces[:space43].display} |"\
-                "#{@spaces[:space53].display} |#{@spaces[:space63].display} |#{@spaces[:space73].display} |\n"\
-                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space02].display} |#{@spaces[:space12].display} |"\
-                "#{@spaces[:space22].display} |#{@spaces[:space32].display} |#{@spaces[:space42].display} |"\
-                "#{@spaces[:space52].display} |#{@spaces[:space62].display} |#{@spaces[:space72].display} |\n"\
-                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space01].display} |#{@spaces[:space11].display} |"\
-                "#{@spaces[:space21].display} |#{@spaces[:space31].display} |#{@spaces[:space41].display} |"\
-                "#{@spaces[:space51].display} |#{@spaces[:space61].display} |#{@spaces[:space71].display} |\n"\
-                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:space00].display} |#{@spaces[:space10].display} |"\
-                "#{@spaces[:space20].display} |#{@spaces[:space30].display} |#{@spaces[:space40].display} |"\
-                "#{@spaces[:space50].display} |#{@spaces[:space60].display} |#{@spaces[:space70].display} |\n"\
+        @display = "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"07"].display} |#{@spaces[:"17"].display} |"\
+                "#{@spaces[:"27"].display} |#{@spaces[:"37"].display} |#{@spaces[:"47"].display} |"\
+                "#{@spaces[:"57"].display} |#{@spaces[:"67"].display} |#{@spaces[:"77"].display} |\n"\
+                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"06"].display} |#{@spaces[:"16"].display} |"\
+                "#{@spaces[:"26"].display} |#{@spaces[:"36"].display} |#{@spaces[:"46"].display} |"\
+                "#{@spaces[:"56"].display} |#{@spaces[:"66"].display} |#{@spaces[:"76"].display} |\n"\
+                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"05"].display} |#{@spaces[:"15"].display} |"\
+                "#{@spaces[:"25"].display} |#{@spaces[:"35"].display} |#{@spaces[:"45"].display} |"\
+                "#{@spaces[:"55"].display} |#{@spaces[:"65"].display} |#{@spaces[:"75"].display} |\n"\
+                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"04"].display} |#{@spaces[:"14"].display} |"\
+                "#{@spaces[:"24"].display} |#{@spaces[:"34"].display} |#{@spaces[:"44"].display} |"\
+                "#{@spaces[:"54"].display} |#{@spaces[:"64"].display} |#{@spaces[:"74"].display} |\n"\
+                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"03"].display} |#{@spaces[:"13"].display} |"\
+                "#{@spaces[:"23"].display} |#{@spaces[:"33"].display} |#{@spaces[:"43"].display} |"\
+                "#{@spaces[:"53"].display} |#{@spaces[:"63"].display} |#{@spaces[:"73"].display} |\n"\
+                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"02"].display} |#{@spaces[:"12"].display} |"\
+                "#{@spaces[:"22"].display} |#{@spaces[:"32"].display} |#{@spaces[:"42"].display} |"\
+                "#{@spaces[:"52"].display} |#{@spaces[:"62"].display} |#{@spaces[:"72"].display} |\n"\
+                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"01"].display} |#{@spaces[:"11"].display} |"\
+                "#{@spaces[:"21"].display} |#{@spaces[:"31"].display} |#{@spaces[:"41"].display} |"\
+                "#{@spaces[:"51"].display} |#{@spaces[:"61"].display} |#{@spaces[:"71"].display} |\n"\
+                "+---+---+---+---+---+---+---+---+\n|#{@spaces[:"00"].display} |#{@spaces[:"10"].display} |"\
+                "#{@spaces[:"20"].display} |#{@spaces[:"30"].display} |#{@spaces[:"40"].display} |"\
+                "#{@spaces[:"50"].display} |#{@spaces[:"60"].display} |#{@spaces[:"70"].display} |\n"\
                 "+---+---+---+---+---+---+---+---+"
     end
 end
