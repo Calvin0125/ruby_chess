@@ -371,7 +371,6 @@ class Rook
         x_and_y = space.split("")
         x = x_and_y[0].to_i
         y = x_and_y[1].to_i
-
         #get positive vertical moves
         while y < 7
             y += 1
@@ -440,8 +439,10 @@ end
 
 class Pawn
     attr_accessor :space, :color
-    attr_reader :possible_moves, :display
-    def initialize(space, color)
+    attr_reader :possible_moves, :display, :name
+    def initialize(name, space, color)
+        #name attribute is necessary for pawn_promotion method
+        @name = name
         @space = space
         @color = color
         if color == "white"
@@ -498,9 +499,10 @@ end
         
 class Team
     attr_accessor :king, :queen, :bishop1, :bishop2, :knight1, :knight2, :rook1, :rook2
-    attr_accessor :pawn1, :pawn2, :pawn3, :pawn4, :pawn5, :pawn6, :pawn7, :pawn8
+    attr_accessor :pawn1, :pawn2, :pawn3, :pawn4, :pawn5, :pawn6, :pawn7, :pawn8, :piece_array
     attr_reader :possible_moves
     def initialize(color)
+        @color = color
         @king = King.new("40", color)
         $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
         @queen = Queen.new("30", color)
@@ -516,24 +518,25 @@ class Team
         @rook1 = Rook.new("00", color)
         $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
         @rook2 = Rook.new("70", color)
-        $board.spaces[:"#{@rook2.space}"].set_space(color, @rook1, @rook2.display)
-        @pawn1 = Pawn.new("01", color)
+        $board.spaces[:"#{@rook2.space}"].set_space(color, @rook2, @rook2.display)
+        @pawn1 = Pawn.new("pawn1", "01", color)
         $board.spaces[:"#{@pawn1.space}"].set_space(color, @pawn1, @pawn1.display)
-        @pawn2 = Pawn.new("11", color)
+        @pawn2 = Pawn.new("pawn2", "11", color)
         $board.spaces[:"#{@pawn2.space}"].set_space(color, @pawn2, @pawn2.display)
-        @pawn3 = Pawn.new("21", color)
+        @pawn3 = Pawn.new("pawn3", "21", color)
         $board.spaces[:"#{@pawn3.space}"].set_space(color, @pawn3, @pawn3.display)
-        @pawn4 = Pawn.new("31", color)
+        @pawn4 = Pawn.new("pawn4", "31", color)
         $board.spaces[:"#{@pawn4.space}"].set_space(color, @pawn4, @pawn4.display)
-        @pawn5 = Pawn.new("41", color)
+        @pawn5 = Pawn.new("pawn5", "41", color)
         $board.spaces[:"#{@pawn5.space}"].set_space(color, @pawn5, @pawn5.display)
-        @pawn6 = Pawn.new("51", color)
+        @pawn6 = Pawn.new("pawn6", "51", color)
         $board.spaces[:"#{@pawn6.space}"].set_space(color, @pawn6, @pawn6.display)
-        @pawn7 = Pawn.new("61", color)
+        @pawn7 = Pawn.new("pawn7", "61", color)
         $board.spaces[:"#{@pawn7.space}"].set_space(color, @pawn7, @pawn7.display)
-        @pawn8 = Pawn.new("71", color)
+        @pawn8 = Pawn.new("pawn8", "71", color)
         $board.spaces[:"#{@pawn8.space}"].set_space(color, @pawn8, @pawn8.display)
-        @piece_array = [@king, @queen, @bishop1, @bishop2, @knight1, @knight2, @pawn1, @pawn2, @pawn3, @pawn4, @pawn5, @pawn6, @pawn7, @pawn8]
+        @piece_array = [@king, @queen, @bishop1, @bishop2, @knight1, @knight2, @rook1, @rook2]
+        @piece_array += [@pawn1, @pawn2, @pawn3, @pawn4, @pawn5, @pawn6, @pawn7, @pawn8]
         $board.update_display
         @possible_moves = update_possible_moves
     end
@@ -543,9 +546,11 @@ class Team
         possible_moves = []
         @piece_array.each do |piece|
             piece.update_possible_moves(piece.space)
-            possible_moves += piece.possible_moves
+            unless piece.possible_moves == nil
+                possible_moves += piece.possible_moves
+            end
         end
-        possible_moves.uniq!
+        @possible_moves = possible_moves.uniq!
     end
 
     def take_turn(start, destination)
@@ -558,12 +563,39 @@ class Team
         end
         $board.spaces[:"#{start}"].set_space(nil, nil, "  ")
         moving_piece.space = destination
-        moving_piece.update_possible_moves(destination)
-        $board.spaces[:"#{destination}"].set_space(moving_piece.color, moving_piece, moving_piece.display)
+        last_row = ["07", "17", "27", "37", "47", "57", "67", "77"]
+        if last_row.include?(destination) && moving_piece.class == Pawn
+            #get piece from user input
+            new_piece = pawn_promotion(moving_piece.name, "knight", destination)
+            moving_piece.space = nil
+            $board.spaces[:"#{destination}"].set_space(new_piece.color, new_piece, new_piece.display)
+        else
+            $board.spaces[:"#{destination}"].set_space(moving_piece.color, moving_piece, moving_piece.display)
+        end
         update_possible_moves
         $board.update_display
+    end
+
+    def pawn_promotion(pawn, piece, space)
+        case piece
+        when "knight"
+            new_piece = instance_variable_set("@#{pawn}_to_#{piece}", Knight.new("#{space}", @color))
+            self.class.send(:attr_accessor, "#{pawn}_to_#{piece}")
+        when "rook"
+            new_piece = instance_variable_set("@#{pawn}_to_#{piece}", Rook.new("#{space}", @color))
+            self.class.send(:attr_accessor, "#{pawn}_to_#{piece}")
+        when "bishop"
+            new_piece = instance_variable_set("@#{pawn}_to_#{piece}", Bishop.new("#{space}", @color))
+            self.class.send(:attr_accessor, "#{pawn}_to_#{piece}")
+        when "queen"
+            new_piece = instance_variable_set("@#{pawn}_to_#{piece}", Queen.new("#{space}", @color))
+            self.class.send(:attr_accessor, "#{pawn}_to_#{piece}")
+        end
+        @piece_array << new_piece
+        return new_piece
     end
 end
         
 white = Team.new("white")
 puts $board.display
+
