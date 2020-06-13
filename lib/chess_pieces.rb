@@ -205,25 +205,354 @@ class Queen
     end
 end
 
+class Bishop
+    attr_accessor :space, :color
+    attr_reader :possible_moves, :display
+    def initialize(space, color)
+        @space = space
+        @color = color
+        if color == "white"
+            @display = WHITE_BISHOP
+        elsif
+            color == "red"
+            @display = RED_BISHOP
+        end
+        @possible_moves = get_possible_moves(space)
+    end
+
+    def get_possible_moves(space)
+        if space == nil
+            return nil
+        end
+        possible_moves = []
+        x_and_y = space.split("")
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+
+        #get positive diagonal moves to the right
+        while y < 7 && x < 7
+            y += 1
+            x += 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+
+        #get positive diagonal moves to the left
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+        while y < 7 && x > 0
+            y += 1
+            x -= 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+
+        #get negative diagonal moves to the left
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+        while x > 0 && y > 0
+            x -= 1
+            y -= 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+
+        #get negative diagonal moves to the right
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+        while x < 7 && y > 0
+            x += 1
+            y -= 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+        return possible_moves
+    end
+
+    def update_possible_moves(space)
+        @possible_moves = get_possible_moves(space)
+    end
+end
+
+class Knight
+    attr_accessor :space, :color
+    attr_reader :possible_moves, :display
+    def initialize(space, color)
+        @space = space
+        @color = color
+        if color == "white"
+            @display = WHITE_KNIGHT
+        elsif color == "red"
+            @display = RED_KNIGHT
+        end
+        @possible_moves = get_possible_moves(space)
+    end
+
+    def get_possible_moves(space)
+        if space == nil
+            return nil
+        end
+        possible_moves = []
+        x_and_y = space.split("")
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+        first_move = "#{x + 2}#{y + 1}"
+        possible_moves << first_move if $board.spaces.has_key?(:"#{first_move}")
+        second_move = "#{x + 1}#{y + 2}"
+        possible_moves << second_move if $board.spaces.has_key?(:"#{second_move}")
+        third_move = "#{x - 1}#{y + 2}"
+        possible_moves << third_move if $board.spaces.has_key?(:"#{third_move}")
+        fourth_move = "#{x - 2}#{y + 1}"
+        possible_moves << fourth_move if $board.spaces.has_key?(:"#{fourth_move}")
+        fifth_move = "#{x - 2}#{y - 1}"
+        possible_moves << fifth_move if $board.spaces.has_key?(:"#{fifth_move}")
+        sixth_move = "#{x - 1}#{y - 2}"
+        possible_moves << sixth_move if $board.spaces.has_key?(:"#{sixth_move}")
+        seventh_move = "#{x + 1}#{y - 2}"
+        possible_moves << seventh_move if $board.spaces.has_key?(:"#{seventh_move}")
+        eighth_move = "#{x + 2}#{y - 1}"
+        possible_moves << eighth_move if $board.spaces.has_key?(:"#{eighth_move}")
+        possible_moves.delete_if{|space| $board.spaces[:"#{space}"].occupied == @color}
+        return possible_moves
+    end
+    def update_possible_moves(space)
+        @possible_moves = get_possible_moves(space)
+    end
+end
+
+class Rook
+    attr_accessor :space, :color
+    attr_reader :possible_moves, :display
+    def initialize(space, color)
+        @space = space
+        @color = color
+        if color == "white"
+            @display = WHITE_ROOK
+        elsif
+            color == "red"
+            @display = RED_ROOK
+        end
+        @possible_moves = get_possible_moves(space)
+    end
+
+    def get_possible_moves(space)
+        if space == nil
+            return nil
+        end
+        possible_moves = []
+        x_and_y = space.split("")
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+
+        #get positive vertical moves
+        while y < 7
+            y += 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+
+        #get negative vertical moves
+        y = x_and_y[1].to_i
+        while y > 0
+            y -= 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+
+        #get horizontal moves to the right
+        y = x_and_y[1].to_i
+        while x < 7
+            x += 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+
+        #get horizontal moves to the left
+        x = x_and_y[0].to_i
+        while x > 0
+            x -= 1
+            next_move = "#{x}#{y}"
+            if $board.spaces[:"#{next_move}"].occupied == "#{@color}"
+                break
+            elsif $board.spaces[:"#{next_move}"].occupied == nil
+                possible_moves << next_move
+            else
+                possible_moves << next_move
+                break
+            end
+        end
+        return possible_moves
+    end
+
+    def update_possible_moves(space)
+        @possible_moves = get_possible_moves(space)
+    end
+end
+
+class Pawn
+    attr_accessor :space, :color
+    attr_reader :possible_moves, :display
+    def initialize(space, color)
+        @space = space
+        @color = color
+        if color == "white"
+            @display = WHITE_PAWN
+        elsif
+            color == "red"
+            @display = RED_PAWN
+        end
+        @possible_moves = get_possible_moves(space)
+    end
+
+    def get_possible_moves(space)
+        if space == nil
+            return nil
+        end
+        possible_moves = []
+        x_and_y = space.split("")
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+        if $board.spaces[:"#{x}#{y + 1}"].occupied == nil
+            possible_moves << "#{x}#{y + 1}"
+            if y == 1 && $board.spaces[:"#{x}#{y + 2}"].occupied == nil
+            possible_moves << "#{x}#{y + 2}"
+            end
+        end
+        
+        other_color = ''
+        if @color == "white"
+            other_color = "red"
+        elsif @color == "red"
+            other_color = "white"
+        end
+
+        capture_move_right = "#{x + 1}#{y + 1}"
+        unless $board.spaces[:"#{capture_move_right}"] == nil  
+            if $board.spaces[:"#{capture_move_right}"].occupied == other_color
+                possible_moves << "#{x + 1}#{y + 1}"
+            end
+        end
+
+        capture_move_left = "#{x - 1}#{y + 1}"
+        unless $board.spaces[:"#{capture_move_left}"] == nil
+            if $board.spaces[:"#{capture_move_left}"].occupied == other_color
+                possible_moves << "#{x - 1}#{y + 1}"
+            end
+        end
+        return possible_moves
+    end
+
+    def update_possible_moves(space)
+        @possible_moves = get_possible_moves(space)
+    end
+end
+        
 class Team
-    attr_accessor :king, :queen, :possible_moves
+    attr_accessor :king, :queen, :bishop1, :bishop2, :knight1, :knight2, :rook1, :rook2
+    attr_accessor :pawn1, :pawn2, :pawn3, :pawn4, :pawn5, :pawn6, :pawn7, :pawn8
+    attr_reader :possible_moves
     def initialize(color)
-        @king = King.new("30", color)
+        @king = King.new("40", color)
         $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
-        @queen = Queen.new("40", color)
+        @queen = Queen.new("30", color)
         $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
+        @bishop1 = Bishop.new("20", color)
+        $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
+        @bishop2 = Bishop.new("50", color)
+        $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
+        @knight1 = Knight.new("10", color)
+        $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
+        @knight2 = Knight.new("60", color)
+        $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
+        @rook1 = Rook.new("00", color)
+        $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
+        @rook2 = Rook.new("70", color)
+        $board.spaces[:"#{@rook2.space}"].set_space(color, @rook1, @rook2.display)
+        @pawn1 = Pawn.new("01", color)
+        $board.spaces[:"#{@pawn1.space}"].set_space(color, @pawn1, @pawn1.display)
+        @pawn2 = Pawn.new("11", color)
+        $board.spaces[:"#{@pawn2.space}"].set_space(color, @pawn2, @pawn2.display)
+        @pawn3 = Pawn.new("21", color)
+        $board.spaces[:"#{@pawn3.space}"].set_space(color, @pawn3, @pawn3.display)
+        @pawn4 = Pawn.new("31", color)
+        $board.spaces[:"#{@pawn4.space}"].set_space(color, @pawn4, @pawn4.display)
+        @pawn5 = Pawn.new("41", color)
+        $board.spaces[:"#{@pawn5.space}"].set_space(color, @pawn5, @pawn5.display)
+        @pawn6 = Pawn.new("51", color)
+        $board.spaces[:"#{@pawn6.space}"].set_space(color, @pawn6, @pawn6.display)
+        @pawn7 = Pawn.new("61", color)
+        $board.spaces[:"#{@pawn7.space}"].set_space(color, @pawn7, @pawn7.display)
+        @pawn8 = Pawn.new("71", color)
+        $board.spaces[:"#{@pawn8.space}"].set_space(color, @pawn8, @pawn8.display)
+        @piece_array = [@king, @queen, @bishop1, @bishop2, @knight1, @knight2, @pawn1, @pawn2, @pawn3, @pawn4, @pawn5, @pawn6, @pawn7, @pawn8]
         $board.update_display
         @possible_moves = update_possible_moves
     end
 
     def update_possible_moves
-        @king.update_possible_moves(@king.space)
-        @queen.update_possible_moves(@queen.space)
-        possible_moves = (@king.possible_moves + @queen.possible_moves).uniq!
+        #use piece array so that as pieces are added through pawn transformation the possible moves will stay up to date
+        possible_moves = []
+        @piece_array.each do |piece|
+            piece.update_possible_moves(piece.space)
+            possible_moves += piece.possible_moves
+        end
+        possible_moves.uniq!
     end
 
     def take_turn(start, destination)
         moving_piece = $board.spaces[:"#{start}"].piece
+        if moving_piece == nil
+            return nil
+        end
         unless moving_piece.possible_moves.include?(destination)
             return nil
         end
@@ -238,10 +567,3 @@ end
         
 white = Team.new("white")
 puts $board.display
-p white.queen.possible_moves
-p white.king.possible_moves
-white.take_turn("40", "31")
-puts $board.display
-p white.queen.possible_moves
-p white.king.possible_moves
-
