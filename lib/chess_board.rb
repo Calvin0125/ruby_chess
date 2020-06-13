@@ -33,7 +33,7 @@ class Board
         x = 0
         y = 0
         64.times do
-            @spaces[:"#{x}#{y}"] = Space.new("#{x}#{y}")
+            @spaces[:"#{x}#{y}"] = Space.new
             if y < 7
                 y += 1
             elsif y >= 7
