@@ -1,7 +1,7 @@
 require './lib/chess_board.rb'
 
 class King
-    attr_accessor :space, :color
+    attr_accessor :space, :color, :not_moved
     #display should never be changed, and possible_moves should only be updated based on current space
     attr_reader :display, :possible_moves
     def initialize(space, color)
@@ -13,6 +13,7 @@ class King
             @display = RED_KING
         end
         @possible_moves = get_possible_moves(@space)
+        @not_moved = true
     end
 
     def get_possible_moves(space)
@@ -39,6 +40,44 @@ class King
         possible_moves << seventh_move if $board.spaces.has_key?(:"#{seventh_move}")
         eighth_move = "#{x}#{y - 1}"
         possible_moves << eighth_move if $board.spaces.has_key?(:"#{eighth_move}")
+        
+        #check if castling is a possible move
+        if self.color == "white"
+            #have to check for nil or else get_possible_moves throws an error because variable referring to class is not available
+            #while the class is initializing
+            unless $white == nil
+                unless $white.check?(self.color)
+                    if ($white.king.not_moved == true && $white.rook1.not_moved == true) &&
+                        ($board.spaces[:"10"].occupied == nil && $red.possible_moves.include?("10") == false) &&
+                        ($board.spaces[:"20"].occupied == nil && $red.possible_moves.include?("20") == false) &&
+                        ($board.spaces[:"30"].occupied == nil && $red.possible_moves.include?("30") == false) 
+                        possible_moves << "20"
+                    end
+                    if ($white.king.not_moved == true && $white.rook2.not_moved == true) &&
+                        ($board.spaces[:"50"].occupied == nil && $red.possible_moves.include?("50") == false) &&
+                        ($board.spaces[:"60"].occupied == nil && $red.possible_moves.include?("60") == false)
+                        possible_moves << "60"
+                    end
+                end
+            end
+        elsif self.color == "red"
+            unless $red == nil
+                unless $red.check?(self.color)
+                    if ($red.king.not_moved == true && $red.rook1.not_moved == true) &&
+                        ($board.spaces[:"17"].occupied == nil && $white.possible_moves.include?("17") == false) &&
+                        ($board.spaces[:"27"].occupied == nil && $white.possible_moves.include?("27") == false) &&
+                        ($board.spaces[:"37"].occupied == nil && $white.possible_moves.include?("37") == false) &&
+                        possible_moves << "27"
+                    end
+                    if ($red.king.not_moved == true && $red.rook2.not_moved == true) &&
+                        ($board.spaces[:"57"].occupied == nil && $white.possible_moves.include?("57") == false) &&
+                        ($board.spaces[:"67"].occupied == nil && $white.possible_moves.include?("67") == false)
+                        possible_moves << "67"
+                    end
+                end
+            end
+        end
+           
         possible_moves.delete_if{|space| $board.spaces[:"#{space}"].occupied == @color}
         return possible_moves
     end
@@ -349,7 +388,7 @@ class Knight
 end
 
 class Rook
-    attr_accessor :space, :color
+    attr_accessor :space, :color, :not_moved
     attr_reader :possible_moves, :display
     def initialize(space, color)
         @space = space
@@ -361,6 +400,7 @@ class Rook
             @display = RED_ROOK
         end
         @possible_moves = get_possible_moves(space)
+        @not_moved = true
     end
 
     def get_possible_moves(space)
@@ -565,15 +605,15 @@ class Team
         if color == "white"
             @king = King.new("40", color)
             $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
-            @queen = Queen.new("30", color)
+            @queen = Queen.new("32", color)
             $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
-            @bishop1 = Bishop.new("20", color)
+            @bishop1 = Bishop.new("22", color)
             $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
-            @bishop2 = Bishop.new("50", color)
+            @bishop2 = Bishop.new("52", color)
             $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
-            @knight1 = Knight.new("10", color)
+            @knight1 = Knight.new("12", color)
             $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
-            @knight2 = Knight.new("60", color)
+            @knight2 = Knight.new("62", color)
             $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
             @rook1 = Rook.new("00", color)
             $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
@@ -598,15 +638,15 @@ class Team
         elsif color == "red"
             @king = King.new("47", color)
             $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
-            @queen = Queen.new("37", color)
+            @queen = Queen.new("35", color)
             $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
-            @bishop1 = Bishop.new("27", color)
+            @bishop1 = Bishop.new("25", color)
             $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
-            @bishop2 = Bishop.new("57", color)
+            @bishop2 = Bishop.new("55", color)
             $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
-            @knight1 = Knight.new("17", color)
+            @knight1 = Knight.new("15", color)
             $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
-            @knight2 = Knight.new("67", color)
+            @knight2 = Knight.new("65", color)
             $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
             @rook1 = Rook.new("07", color)
             $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
@@ -662,26 +702,36 @@ class Team
             return nil
         end
 
+        x_and_y = start.split("")
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+
         other_color = ""
         if self.color == "red"
             other_color = $white
         elsif self.color == "white"
             other_color = $red
         end
+
         if check?(self.color)
             if $board.spaces[:"#{start}"].piece.class != King
                 return "check"
             end
         end
+
         if $board.spaces[:"#{start}"].piece.class == King && other_color.possible_moves.include?("#{destination}")
             return "destination check"
         end
+
         $board.spaces[:"#{start}"].set_space(nil, nil, "  ")
         moving_piece.space = destination
         first_and_last_row = ["07", "17", "27", "37", "47", "57", "67", "77", "00", "10", "20", "30", "40", "50", "60", "70"]
         captured_piece = en_passant(start, destination, moving_piece)
+
         if captured_piece == nil
-            if first_and_last_row.include?(destination) && moving_piece.class == Pawn
+            if moving_piece.class == King && (destination == "#{x + 2}#{y}" || destination == "#{x - 2}#{y}")
+                castle(start, destination, moving_piece)
+            elsif first_and_last_row.include?(destination) && moving_piece.class == Pawn
                 #get piece from user input
                 new_piece = pawn_promotion(moving_piece.name, "knight", destination)
                 moving_piece.space = nil
@@ -695,7 +745,11 @@ class Team
         else
             $board.spaces[:"#{destination}"].set_space(moving_piece.color, moving_piece, moving_piece.display)
         end
+
         update_en_passant(start, destination)
+        if moving_piece.class == Rook || moving_piece.class == King
+            moving_piece.not_moved = false
+        end
         $red.update_possible_moves
         $white.update_possible_moves
         $board.update_display
@@ -742,6 +796,39 @@ class Team
             return true
         end
     end
+
+    def castle(start, destination, king)
+        $board.spaces[:"#{destination}"].set_space(king.color, king, king.display)
+        $board.spaces[:"#{start}"].set_space(nil, nil, "  ")
+        king.space = "#{destination}"
+        case destination
+        when "20"
+            rook = $board.spaces[:"00"].piece
+            $board.spaces[:"00"].set_space(nil, nil, "  ")
+            $board.spaces[:"30"].set_space(rook.color, rook, rook.display)
+            rook.space = "30"
+            rook.not_moved = false
+        when "60"
+            rook = $board.spaces[:"70"].piece
+            $board.spaces[:"70"].set_space(nil, nil, "  ")
+            $board.spaces[:"50"].set_space(rook.color, rook, rook.display)
+            rook.space = "50"
+            rook.not_moved = false
+        when "27"
+            rook = $board.spaces[:"07"].piece
+            $board.spaces[:"07"].set_space(nil, nil, "  ")
+            $board.spaces[:"37"].set_space(rook.color, rook, rook.display)
+            rook.space = "37"
+            rook.not_moved = false
+        when "67"
+            rook = $board.spaces[:"77"].piece
+            $board.spaces[:"77"].set_space(nil, nil, "  ")
+            $board.spaces[:"57"].set_space(rook.color, rook, rook.display)
+            rook.space = "57"
+            rook.not_moved = false
+        end
+    end
+            
 
     def en_passant(start, destination, piece)
         unless piece.class == Pawn
@@ -816,10 +903,11 @@ end
 $red = Team.new("red")
 $white = Team.new("white")
 puts $board.display
-$white.take_turn("21", "23")
+$white.take_turn("01", "03")
 puts $board.display
-$red.take_turn("36", "35")
+p $white.king.possible_moves
+p $red.king.possible_moves
+$white.take_turn("40", "60")
 puts $board.display
-result = $white.take_turn("30", "03")
+$red.take_turn("47", "27")
 puts $board.display
-p result
