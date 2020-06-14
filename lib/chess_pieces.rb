@@ -557,7 +557,7 @@ class Pawn
 end
         
 class Team
-    attr_accessor :king, :queen, :bishop1, :bishop2, :knight1, :knight2, :rook1, :rook2
+    attr_accessor :king, :queen, :bishop1, :bishop2, :knight1, :knight2, :rook1, :rook2, :color
     attr_accessor :pawn1, :pawn2, :pawn3, :pawn4, :pawn5, :pawn6, :pawn7, :pawn8, :piece_array
     attr_reader :possible_moves
     def initialize(color)
@@ -649,6 +649,9 @@ class Team
 
     def take_turn(start, destination)
         if $board.spaces[:"#{start}"] == nil
+            return nil
+        end
+        unless $board.spaces[:"#{start}"].occupied == self.color
             return nil
         end
         moving_piece = $board.spaces[:"#{start}"].piece
@@ -757,17 +760,5 @@ end
 $red = Team.new("red")
 $white = Team.new("white")
 puts $board.display
-$red.take_turn("46", "44")
+p $red.take_turn("01", "03")
 puts $board.display
-p $red.pawn5.en_passant
-$white.take_turn("01", "02")
-puts $board.display
-p $white.pawn1.en_passant
-$red.take_turn("44", "43")
-puts $board.display
-$white.take_turn("31", "33")
-puts $board.display
-captured_piece = $red.take_turn("43", "32")
-puts $board.display
-p captured_piece
-
