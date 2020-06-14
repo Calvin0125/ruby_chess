@@ -661,6 +661,21 @@ class Team
         unless moving_piece.possible_moves.include?(destination)
             return nil
         end
+
+        other_color = ""
+        if self.color == "red"
+            other_color = $white
+        elsif self.color == "white"
+            other_color = $red
+        end
+        if check?(self.color)
+            if $board.spaces[:"#{start}"].piece.class != King
+                return "check"
+            end
+        end
+        if $board.spaces[:"#{start}"].piece.class == King && other_color.possible_moves.include?("#{destination}")
+            return "destination check"
+        end
         $board.spaces[:"#{start}"].set_space(nil, nil, "  ")
         moving_piece.space = destination
         first_and_last_row = ["07", "17", "27", "37", "47", "57", "67", "77", "00", "10", "20", "30", "40", "50", "60", "70"]
@@ -685,6 +700,20 @@ class Team
         $white.update_possible_moves
         $board.update_display
         return captured_piece
+    end
+
+    def check?(color)
+        if color == "white"
+            if $red.possible_moves.include?($white.king.space)
+                return true
+            end
+        elsif color == "red"
+            if $white.possible_moves.include?($red.king.space)
+                return true
+            end
+        else
+            return false
+        end
     end
 
     def en_passant(start, destination, piece)
@@ -760,5 +789,18 @@ end
 $red = Team.new("red")
 $white = Team.new("white")
 puts $board.display
-p $red.take_turn("01", "03")
+$white.take_turn("21", "23")
+puts $board.display
+$red.take_turn("36", "35")
+$red.take_turn("46", "45")
+puts $board.display
+$white.take_turn("30", "03")
+puts $board.display
+result = $red.take_turn("06", "04")
+puts $board.display
+p result
+result = $red.take_turn("47", "36")
+puts $board.display
+p result
+$red.take_turn("47", "46")
 puts $board.display
