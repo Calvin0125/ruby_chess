@@ -699,6 +699,9 @@ class Team
         $red.update_possible_moves
         $white.update_possible_moves
         $board.update_display
+        if checkmate?(other_color.color)
+            return "checkmate!"
+        end
         return captured_piece
     end
 
@@ -713,6 +716,30 @@ class Team
             end
         else
             return false
+        end
+    end
+
+    def checkmate?(color)
+        if color == "white"
+            unless $red.possible_moves.include?($white.king.space)
+                return false
+            end
+            $white.king.possible_moves.each do |space|
+                unless $red.possible_moves.include?(space)
+                    return false
+                end
+            end
+            return true
+        elsif color == "red"
+            unless $white.possible_moves.include?($red.king.space)
+                return false
+            end
+            $red.king.possible_moves.each do |space|
+                unless $white.possible_moves.include?(space)
+                    return false
+                end
+            end
+            return true
         end
     end
 
@@ -792,15 +819,7 @@ puts $board.display
 $white.take_turn("21", "23")
 puts $board.display
 $red.take_turn("36", "35")
-$red.take_turn("46", "45")
 puts $board.display
-$white.take_turn("30", "03")
-puts $board.display
-result = $red.take_turn("06", "04")
+result = $white.take_turn("30", "03")
 puts $board.display
 p result
-result = $red.take_turn("47", "36")
-puts $board.display
-p result
-$red.take_turn("47", "46")
-puts $board.display
