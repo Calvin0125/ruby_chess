@@ -1,4 +1,5 @@
 require './lib/chess_board.rb'
+require 'yaml'
 
 class King
     attr_accessor :space, :color, :not_moved
@@ -605,15 +606,15 @@ class Team
         if color == "white"
             @king = King.new("40", color)
             $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
-            @queen = Queen.new("32", color)
+            @queen = Queen.new("30", color)
             $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
-            @bishop1 = Bishop.new("22", color)
+            @bishop1 = Bishop.new("20", color)
             $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
-            @bishop2 = Bishop.new("52", color)
+            @bishop2 = Bishop.new("50", color)
             $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
-            @knight1 = Knight.new("12", color)
+            @knight1 = Knight.new("10", color)
             $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
-            @knight2 = Knight.new("62", color)
+            @knight2 = Knight.new("60", color)
             $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
             @rook1 = Rook.new("00", color)
             $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
@@ -638,15 +639,15 @@ class Team
         elsif color == "red"
             @king = King.new("47", color)
             $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
-            @queen = Queen.new("35", color)
+            @queen = Queen.new("37", color)
             $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
-            @bishop1 = Bishop.new("25", color)
+            @bishop1 = Bishop.new("27", color)
             $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
-            @bishop2 = Bishop.new("55", color)
+            @bishop2 = Bishop.new("57", color)
             $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
-            @knight1 = Knight.new("15", color)
+            @knight1 = Knight.new("17", color)
             $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
-            @knight2 = Knight.new("65", color)
+            @knight2 = Knight.new("67", color)
             $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
             @rook1 = Rook.new("07", color)
             $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
@@ -686,6 +687,48 @@ class Team
         end
         @possible_moves = possible_moves.uniq!
     end
+    
+    def save_states
+        red = YAML::dump($red)
+        white = YAML::dump($white)
+        board = YAML::dump($board)
+        Dir.mkdir("saved_states") unless Dir.exists?("saved_states")
+        red_file = "saved_states/red"
+        File.open(red_file, "w") do |file|
+            file.puts(red)
+        end
+        white_file = "saved_states/white"
+        File.open(white_file, "w") do |file|
+            file.puts(white)
+        end
+        board_file = "saved_states/board"
+        File.open(board_file, "w") do |file|
+            file.puts(board)
+        end
+    end
+
+    def restore_states
+        red_file = "saved_states/red"
+        white_file = "saved_states/white"
+        board_file = "saved_states/board"
+        
+        red = File.open(red_file, "r") do |file|
+            YAML::load(file)
+        end
+        $red = red
+
+        white = File.open(white_file, "r") do |file|
+            YAML::load(file)
+        end
+        $white = white
+
+        board = File.open(board_file, "r") do |file|
+            YAML::load(file)
+        end
+        $board = board
+    end
+        
+
 
     def take_turn(start, destination)
         if $board.spaces[:"#{start}"] == nil
@@ -701,27 +744,12 @@ class Team
         unless moving_piece.possible_moves.include?(destination)
             return nil
         end
+        
+        save_states
 
         x_and_y = start.split("")
         x = x_and_y[0].to_i
         y = x_and_y[1].to_i
-
-        other_color = ""
-        if self.color == "red"
-            other_color = $white
-        elsif self.color == "white"
-            other_color = $red
-        end
-
-        if check?(self.color)
-            if $board.spaces[:"#{start}"].piece.class != King
-                return "check"
-            end
-        end
-
-        if $board.spaces[:"#{start}"].piece.class == King && other_color.possible_moves.include?("#{destination}")
-            return "destination check"
-        end
 
         $board.spaces[:"#{start}"].set_space(nil, nil, "  ")
         moving_piece.space = destination
@@ -745,6 +773,7 @@ class Team
         else
             $board.spaces[:"#{destination}"].set_space(moving_piece.color, moving_piece, moving_piece.display)
         end
+        
 
         update_en_passant(start, destination)
         if moving_piece.class == Rook || moving_piece.class == King
@@ -753,10 +782,14 @@ class Team
         $red.update_possible_moves
         $white.update_possible_moves
         $board.update_display
-        if checkmate?(other_color.color)
-            return "checkmate!"
+        
+        if check?(self.color)
+            restore_states
+            return "check"
         end
-        return captured_piece
+
+        return captured_piece if captured_piece != nil
+        return true
     end
 
     def check?(color)
@@ -773,28 +806,21 @@ class Team
         end
     end
 
-    def checkmate?(color)
-        if color == "white"
-            unless $red.possible_moves.include?($white.king.space)
-                return false
-            end
-            $white.king.possible_moves.each do |space|
-                unless $red.possible_moves.include?(space)
-                    return false
-                end
-            end
-            return true
-        elsif color == "red"
-            unless $white.possible_moves.include?($red.king.space)
-                return false
-            end
-            $red.king.possible_moves.each do |space|
-                unless $white.possible_moves.include?(space)
-                    return false
-                end
-            end
-            return true
+    def checkmate?
+        unless check?(self.color) == true
+            return false
         end
+        @piece_array.each do |piece|
+            piece.possible_moves.each do |move|
+                result = take_turn(piece.space, move)
+                restore_states
+                update_possible_moves
+                unless result == "check"
+                    return false
+                end
+            end
+        end
+        return true
     end
 
     def castle(start, destination, king)
@@ -903,11 +929,10 @@ end
 $red = Team.new("red")
 $white = Team.new("white")
 puts $board.display
-$white.take_turn("01", "03")
+$white.take_turn("51", "52")
+$red.take_turn("46", "44")
+$white.take_turn("61", "63")
 puts $board.display
-p $white.king.possible_moves
-p $red.king.possible_moves
-$white.take_turn("40", "60")
+$red.take_turn("37", "73")
 puts $board.display
-$red.take_turn("47", "27")
-puts $board.display
+puts $white.checkmate?
