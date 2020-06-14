@@ -462,31 +462,48 @@ class Pawn
         x_and_y = space.split("")
         x = x_and_y[0].to_i
         y = x_and_y[1].to_i
-        if $board.spaces[:"#{x}#{y + 1}"].occupied == nil
-            possible_moves << "#{x}#{y + 1}"
-            if y == 1 && $board.spaces[:"#{x}#{y + 2}"].occupied == nil
-            possible_moves << "#{x}#{y + 2}"
-            end
-        end
-        
-        other_color = ''
+
         if @color == "white"
-            other_color = "red"
-        elsif @color == "red"
-            other_color = "white"
-        end
-
-        capture_move_right = "#{x + 1}#{y + 1}"
-        unless $board.spaces[:"#{capture_move_right}"] == nil  
-            if $board.spaces[:"#{capture_move_right}"].occupied == other_color
-                possible_moves << "#{x + 1}#{y + 1}"
+            if $board.spaces[:"#{x}#{y + 1}"].occupied == nil
+                possible_moves << "#{x}#{y + 1}"
+                if y == 1 && $board.spaces[:"#{x}#{y + 2}"].occupied == nil
+                possible_moves << "#{x}#{y + 2}"
+                end
             end
-        end
 
-        capture_move_left = "#{x - 1}#{y + 1}"
-        unless $board.spaces[:"#{capture_move_left}"] == nil
-            if $board.spaces[:"#{capture_move_left}"].occupied == other_color
-                possible_moves << "#{x - 1}#{y + 1}"
+            capture_move_right = "#{x + 1}#{y + 1}"
+            unless $board.spaces[:"#{capture_move_right}"] == nil  
+                if $board.spaces[:"#{capture_move_right}"].occupied == "red"
+                    possible_moves << "#{x + 1}#{y + 1}"
+                end
+            end
+
+            capture_move_left = "#{x - 1}#{y + 1}"
+            unless $board.spaces[:"#{capture_move_left}"] == nil
+                if $board.spaces[:"#{capture_move_left}"].occupied == "red"
+                    possible_moves << "#{x - 1}#{y + 1}"
+                end
+            end
+        elsif @color == "red"
+            if $board.spaces[:"#{x}#{y - 1}"].occupied == nil
+                possible_moves << "#{x}#{y - 1}"
+                if y == 6 && $board.spaces[:"#{x}#{y - 2}"].occupied == nil
+                possible_moves << "#{x}#{y - 2}"
+                end
+            end
+
+            capture_move_right = "#{x + 1}#{y - 1}"
+            unless $board.spaces[:"#{capture_move_right}"] == nil  
+                if $board.spaces[:"#{capture_move_right}"].occupied == "white"
+                    possible_moves << "#{x + 1}#{y - 1}"
+                end
+            end
+
+            capture_move_left = "#{x - 1}#{y - 1}"
+            unless $board.spaces[:"#{capture_move_left}"] == nil
+                if $board.spaces[:"#{capture_move_left}"].occupied == "white"
+                    possible_moves << "#{x - 1}#{y - 1}"
+                end
             end
         end
         return possible_moves
@@ -503,38 +520,73 @@ class Team
     attr_reader :possible_moves
     def initialize(color)
         @color = color
-        @king = King.new("40", color)
-        $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
-        @queen = Queen.new("30", color)
-        $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
-        @bishop1 = Bishop.new("20", color)
-        $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
-        @bishop2 = Bishop.new("50", color)
-        $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
-        @knight1 = Knight.new("10", color)
-        $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
-        @knight2 = Knight.new("60", color)
-        $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
-        @rook1 = Rook.new("00", color)
-        $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
-        @rook2 = Rook.new("70", color)
-        $board.spaces[:"#{@rook2.space}"].set_space(color, @rook2, @rook2.display)
-        @pawn1 = Pawn.new("pawn1", "01", color)
-        $board.spaces[:"#{@pawn1.space}"].set_space(color, @pawn1, @pawn1.display)
-        @pawn2 = Pawn.new("pawn2", "11", color)
-        $board.spaces[:"#{@pawn2.space}"].set_space(color, @pawn2, @pawn2.display)
-        @pawn3 = Pawn.new("pawn3", "21", color)
-        $board.spaces[:"#{@pawn3.space}"].set_space(color, @pawn3, @pawn3.display)
-        @pawn4 = Pawn.new("pawn4", "31", color)
-        $board.spaces[:"#{@pawn4.space}"].set_space(color, @pawn4, @pawn4.display)
-        @pawn5 = Pawn.new("pawn5", "41", color)
-        $board.spaces[:"#{@pawn5.space}"].set_space(color, @pawn5, @pawn5.display)
-        @pawn6 = Pawn.new("pawn6", "51", color)
-        $board.spaces[:"#{@pawn6.space}"].set_space(color, @pawn6, @pawn6.display)
-        @pawn7 = Pawn.new("pawn7", "61", color)
-        $board.spaces[:"#{@pawn7.space}"].set_space(color, @pawn7, @pawn7.display)
-        @pawn8 = Pawn.new("pawn8", "71", color)
-        $board.spaces[:"#{@pawn8.space}"].set_space(color, @pawn8, @pawn8.display)
+        if color == "white"
+            @king = King.new("40", color)
+            $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
+            @queen = Queen.new("30", color)
+            $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
+            @bishop1 = Bishop.new("20", color)
+            $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
+            @bishop2 = Bishop.new("50", color)
+            $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
+            @knight1 = Knight.new("10", color)
+            $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
+            @knight2 = Knight.new("60", color)
+            $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
+            @rook1 = Rook.new("00", color)
+            $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
+            @rook2 = Rook.new("70", color)
+            $board.spaces[:"#{@rook2.space}"].set_space(color, @rook2, @rook2.display)
+            @pawn1 = Pawn.new("pawn1", "01", color)
+            $board.spaces[:"#{@pawn1.space}"].set_space(color, @pawn1, @pawn1.display)
+            @pawn2 = Pawn.new("pawn2", "11", color)
+            $board.spaces[:"#{@pawn2.space}"].set_space(color, @pawn2, @pawn2.display)
+            @pawn3 = Pawn.new("pawn3", "21", color)
+            $board.spaces[:"#{@pawn3.space}"].set_space(color, @pawn3, @pawn3.display)
+            @pawn4 = Pawn.new("pawn4", "31", color)
+            $board.spaces[:"#{@pawn4.space}"].set_space(color, @pawn4, @pawn4.display)
+            @pawn5 = Pawn.new("pawn5", "41", color)
+            $board.spaces[:"#{@pawn5.space}"].set_space(color, @pawn5, @pawn5.display)
+            @pawn6 = Pawn.new("pawn6", "51", color)
+            $board.spaces[:"#{@pawn6.space}"].set_space(color, @pawn6, @pawn6.display)
+            @pawn7 = Pawn.new("pawn7", "61", color)
+            $board.spaces[:"#{@pawn7.space}"].set_space(color, @pawn7, @pawn7.display)
+            @pawn8 = Pawn.new("pawn8", "71", color)
+            $board.spaces[:"#{@pawn8.space}"].set_space(color, @pawn8, @pawn8.display)
+        elsif color == "red"
+            @king = King.new("47", color)
+            $board.spaces[:"#{@king.space}"].set_space(color, @king, @king.display)
+            @queen = Queen.new("37", color)
+            $board.spaces[:"#{@queen.space}"].set_space(color, @queen, @queen.display)
+            @bishop1 = Bishop.new("27", color)
+            $board.spaces[:"#{@bishop1.space}"].set_space(color, @bishop1, @bishop1.display)
+            @bishop2 = Bishop.new("57", color)
+            $board.spaces[:"#{@bishop2.space}"].set_space(color, @bishop2, @bishop2.display)
+            @knight1 = Knight.new("17", color)
+            $board.spaces[:"#{@knight1.space}"].set_space(color, @knight1, @knight1.display)
+            @knight2 = Knight.new("67", color)
+            $board.spaces[:"#{@knight2.space}"].set_space(color, @knight2, @knight2.display)
+            @rook1 = Rook.new("07", color)
+            $board.spaces[:"#{@rook1.space}"].set_space(color, @rook1, @rook1.display)
+            @rook2 = Rook.new("77", color)
+            $board.spaces[:"#{@rook2.space}"].set_space(color, @rook2, @rook2.display)
+            @pawn1 = Pawn.new("pawn1", "06", color)
+            $board.spaces[:"#{@pawn1.space}"].set_space(color, @pawn1, @pawn1.display)
+            @pawn2 = Pawn.new("pawn2", "16", color)
+            $board.spaces[:"#{@pawn2.space}"].set_space(color, @pawn2, @pawn2.display)
+            @pawn3 = Pawn.new("pawn3", "26", color)
+            $board.spaces[:"#{@pawn3.space}"].set_space(color, @pawn3, @pawn3.display)
+            @pawn4 = Pawn.new("pawn4", "36", color)
+            $board.spaces[:"#{@pawn4.space}"].set_space(color, @pawn4, @pawn4.display)
+            @pawn5 = Pawn.new("pawn5", "46", color)
+            $board.spaces[:"#{@pawn5.space}"].set_space(color, @pawn5, @pawn5.display)
+            @pawn6 = Pawn.new("pawn6", "56", color)
+            $board.spaces[:"#{@pawn6.space}"].set_space(color, @pawn6, @pawn6.display)
+            @pawn7 = Pawn.new("pawn7", "66", color)
+            $board.spaces[:"#{@pawn7.space}"].set_space(color, @pawn7, @pawn7.display)
+            @pawn8 = Pawn.new("pawn8", "76", color)
+            $board.spaces[:"#{@pawn8.space}"].set_space(color, @pawn8, @pawn8.display)
+        end
         @piece_array = [@king, @queen, @bishop1, @bishop2, @knight1, @knight2, @rook1, @rook2]
         @piece_array += [@pawn1, @pawn2, @pawn3, @pawn4, @pawn5, @pawn6, @pawn7, @pawn8]
         $board.update_display
@@ -597,5 +649,5 @@ class Team
 end
         
 white = Team.new("white")
+red = Team.new("red")
 puts $board.display
-
