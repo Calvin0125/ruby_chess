@@ -438,7 +438,7 @@ class Rook
 end
 
 class Pawn
-    attr_accessor :space, :color
+    attr_accessor :space, :color, :en_passant
     attr_reader :possible_moves, :display, :name
     def initialize(name, space, color)
         #name attribute is necessary for pawn_promotion method
@@ -451,6 +451,7 @@ class Pawn
             color == "red"
             @display = RED_PAWN
         end
+        @en_passant = false
         @possible_moves = get_possible_moves(space)
     end
 
@@ -484,6 +485,27 @@ class Pawn
                     possible_moves << "#{x - 1}#{y + 1}"
                 end
             end
+
+            #see if en_passant move is possible
+            unless $board.spaces[:"#{x + 1}#{y}"] == nil
+                if $board.spaces[:"#{x + 1}#{y}"].occupied == "red"
+                    if $board.spaces[:"#{x + 1}#{y}"].piece.class == Pawn
+                        if $board.spaces[:"#{x + 1}#{y}"].piece.en_passant == true
+                            possible_moves << "#{x + 1}#{y + 1}"
+                        end
+                    end
+                end
+            end
+            unless $board.spaces[:"#{x - 1}#{y}"] == nil
+                if $board.spaces[:"#{x - 1}#{y}"].occupied == "red"
+                    if $board.spaces[:"#{x - 1}#{y}"].piece.class == Pawn
+                        if $board.spaces[:"#{x - 1}#{y}"].piece.en_passant == true &&
+                            possible_moves << "#{x - 1}#{y + 1}"
+                        end
+                    end
+                end
+            end
+
         elsif @color == "red"
             if $board.spaces[:"#{x}#{y - 1}"].occupied == nil
                 possible_moves << "#{x}#{y - 1}"
@@ -503,6 +525,26 @@ class Pawn
             unless $board.spaces[:"#{capture_move_left}"] == nil
                 if $board.spaces[:"#{capture_move_left}"].occupied == "white"
                     possible_moves << "#{x - 1}#{y - 1}"
+                end
+            end
+
+            #see if en_passant move is possible
+            unless $board.spaces[:"#{x + 1}#{y}"] == nil
+                if $board.spaces[:"#{x + 1}#{y}"].occupied == "white"
+                    if $board.spaces[:"#{x + 1}#{y}"].piece.class == Pawn
+                        if $board.spaces[:"#{x + 1}#{y}"].piece.en_passant == true
+                            possible_moves << "#{x + 1}#{y - 1}"
+                        end
+                    end
+                end
+            end
+            unless $board.spaces[:"#{x - 1}#{y}"] == nil
+                if $board.spaces[:"#{x - 1}#{y}"].occupied == "white"
+                    if $board.spaces[:"#{x - 1}#{y}"].piece.class == Pawn
+                        if $board.spaces[:"#{x - 1}#{y}"].piece.en_passant == true
+                            possible_moves << "#{x - 1}#{y - 1}"
+                        end
+                    end
                 end
             end
         end
@@ -606,6 +648,9 @@ class Team
     end
 
     def take_turn(start, destination)
+        if $board.spaces[:"#{start}"] == nil
+            return nil
+        end
         moving_piece = $board.spaces[:"#{start}"].piece
         if moving_piece == nil
             return nil
@@ -615,17 +660,77 @@ class Team
         end
         $board.spaces[:"#{start}"].set_space(nil, nil, "  ")
         moving_piece.space = destination
-        last_row = ["07", "17", "27", "37", "47", "57", "67", "77"]
-        if last_row.include?(destination) && moving_piece.class == Pawn
-            #get piece from user input
-            new_piece = pawn_promotion(moving_piece.name, "knight", destination)
-            moving_piece.space = nil
-            $board.spaces[:"#{destination}"].set_space(new_piece.color, new_piece, new_piece.display)
+        first_and_last_row = ["07", "17", "27", "37", "47", "57", "67", "77", "00", "10", "20", "30", "40", "50", "60", "70"]
+        captured_piece = en_passant(start, destination, moving_piece)
+        if captured_piece == nil
+            if first_and_last_row.include?(destination) && moving_piece.class == Pawn
+                #get piece from user input
+                new_piece = pawn_promotion(moving_piece.name, "knight", destination)
+                moving_piece.space = nil
+                $board.spaces[:"#{destination}"].set_space(new_piece.color, new_piece, new_piece.display)
+            else
+                if $board.spaces[:"#{destination}"].occupied != nil
+                    captured_piece = capture_piece(destination)
+                end
+                $board.spaces[:"#{destination}"].set_space(moving_piece.color, moving_piece, moving_piece.display)
+            end
         else
             $board.spaces[:"#{destination}"].set_space(moving_piece.color, moving_piece, moving_piece.display)
         end
-        update_possible_moves
+        update_en_passant(start, destination)
+        $red.update_possible_moves
+        $white.update_possible_moves
         $board.update_display
+        return captured_piece
+    end
+
+    def en_passant(start, destination, piece)
+        unless piece.class == Pawn
+            return nil
+        end
+        x_and_y = start.split("")
+        x = x_and_y[0].to_i
+        y = x_and_y[1].to_i
+        if piece.color == "white"
+            if destination == "#{x + 1}#{y + 1}" && $board.spaces[:"#{destination}"].occupied == nil
+                return captured_piece = capture_piece("#{x + 1}#{y}")
+            elsif destination == "#{x - 1}#{y + 1}" && $board.spaces[:"#{destination}"].occupied == nil
+                return captured_piece = capture_piece("#{x - 1}#{y}")
+            else
+                return nil
+            end
+        elsif piece.color == "red"
+            if destination == "#{x + 1}#{y - 1}" && $board.spaces[:"#{destination}"].occupied == nil
+                return captured_piece = capture_piece("#{x + 1}#{y}")
+            elsif destination == "#{x - 1}#{y - 1}" && $board.spaces[:"#{destination}"].occupied == nil
+                return captured_piece = capture_piece("#{x - 1}#{y}")
+            else 
+                return nil
+            end
+        end
+    end
+
+    def update_en_passant(start, destination)
+        pawn_array = [$red.pawn1, $red.pawn2, $red.pawn3, $red.pawn4, $red.pawn5, $red.pawn6, $red.pawn7, $red.pawn8]
+        pawn_array += [$white.pawn1, $white.pawn2, $white.pawn3, $white.pawn4, $white.pawn5, $white.pawn6, $white.pawn7, $white.pawn8]
+        pawn_array.each do |pawn|
+            pawn.en_passant = false
+        end
+        if $board.spaces[:"#{destination}"].piece.class == Pawn
+            x_and_y = start.split("")
+            x = x_and_y[0].to_i
+            y = x_and_y[1].to_i
+            if destination == "#{x}#{y + 2}" || destination == "#{x}#{y - 2}"
+                $board.spaces[:"#{destination}"].piece.en_passant = true
+            end
+        end
+    end
+
+    def capture_piece(space)
+        captured_piece = $board.spaces[:"#{space}"].piece
+        captured_piece.space = nil
+        $board.spaces[:"#{space}"].set_space(nil, nil, "  ")
+        return captured_piece
     end
 
     def pawn_promotion(pawn, piece, space)
@@ -647,7 +752,22 @@ class Team
         return new_piece
     end
 end
-        
-white = Team.new("white")
-red = Team.new("red")
+
+#red and white must be global variables so both teams' possible moves can be updated at the end of each turn
+$red = Team.new("red")
+$white = Team.new("white")
 puts $board.display
+$red.take_turn("46", "44")
+puts $board.display
+p $red.pawn5.en_passant
+$white.take_turn("01", "02")
+puts $board.display
+p $white.pawn1.en_passant
+$red.take_turn("44", "43")
+puts $board.display
+$white.take_turn("31", "33")
+puts $board.display
+captured_piece = $red.take_turn("43", "32")
+puts $board.display
+p captured_piece
+
